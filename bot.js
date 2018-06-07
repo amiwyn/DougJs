@@ -1,25 +1,29 @@
 const { IncomingWebhook, RTMClient, WebClient } = require('@slack/client');
 const Configstore = require('configstore');
-const filestream = require('fs');
-
-require('./auth-bot');
 
 const config = new Configstore("bot");
 const token = config.get('bot').bot_access_token;
+
+const slurs = ['fuck'];
+
 const web = new WebClient(token);
 const rtm = new RTMClient(token);
 
-var channels = [];
-var slurs = ['fuck'];
+module.exports = {
+  start() {
+    if (this.started) {
+      return;
+    }
+    rtm.start();
+    rtm.on('message', onMessage);
+    //more events
+    started = true;
+  },
 
-rtm.start();
+  started : false
+};
 
-web.channels.list()
-  .then((list) => {
-    channels = list;
-  });
-
-rtm.on('message', (message) => {
+onMessage = (message) => {
   if (isNotFromSelfBot(message)) {
 
     rtm.sendMessage(slurs[0], message.channel)
@@ -28,12 +32,12 @@ rtm.on('message', (message) => {
     })
     .catch(console.error);
   }
-});
+};
 
-let isNotFromAnyBot = (msg) => {
+isNotFromAnyBot = (msg) => {
   return !msg.subtype || msg.subtype !== 'bot_message';
 }
 
-let isNotFromSelfBot = (msg) => {
+isNotFromSelfBot = (msg) => {
   return !msg.subtype || msg.user !== rtm.activeUserId;
 }
