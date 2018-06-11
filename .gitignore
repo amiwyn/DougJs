@@ -65,3 +65,10 @@ typings/
 
 # Serverless directories
 .serverless
+
+# latex output files
+*.fls
+*.fdb_latexmk
+*.aux
+doc/*.gz
+doc/*.log

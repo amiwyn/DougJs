@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit",
-    "start": "node startup.js"
+    "test": "CONFIGKEY=test mocha --slow 180 --exit",
+    "start": "CONFIGKEY=bot node src/startup.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,14 @@
   "homepage": "https://github.com/FlyingJello/Parroteer#readme",
   "dependencies": {
     "@slack/client": "^4.2.2",
+    "body-parser": "^1.18.3",
     "chai": "^4.1.2",
     "configstore": "^3.1.2",
     "express": "^4.16.3",
+    "finity": "^0.5.4",
     "mocha": "^5.2.0",
     "request": "^2.87.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "sinon": "^5.1.1"
   }
 }
