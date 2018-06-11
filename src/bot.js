@@ -134,8 +134,8 @@ function itsCoffeeTime() {
   hour += date.getMinutes() / 60.0;
   let isMorningBreak = morningCoffeeBreak - tolerance < hour == hour < morningCoffeeBreak + tolerance; 
   let isAfternoonBreak = afternoonCoffeeBreak - tolerance < hour == hour < afternoonCoffeeBreak + tolerance;
-  //return isMorningBreak || isAfternoonBreak;
-  return true;
+  return isMorningBreak || isAfternoonBreak;
+  //return true;
 }
 
 // function sendRandomSlur(channel) {
