@@ -22,14 +22,19 @@ function joincoffeeCommand(req, res) {
   let userid = req.body.user_id;
   let channelID = req.body.channel_id;
 
-  setCoffeeChannel(channelID)
-    .then(() => {
+  web.conversations.info({ channel: channelID })
+    .then(info => {
+      if (info.channel.name === "general") {
+        return Promise.reject("you can't do this on #general channel");
+      }
+      config.set('channel', channelID);
       addToRoster(userid);
-      let message = utils.userMention(userid) + " joined coffee break";
-      rtm.sendMessage(message, channelID)
-        .catch(console.error);
-      res.send();
+      return utils.userMention(userid) + " joined coffee break";
     })
+    .then(message => {
+      return rtm.sendMessage(message, channelID);
+    })
+    .then(() => res.send())
     .catch(error => {
       res.send("beep boop, its not working : " + error);
     });
@@ -45,25 +50,6 @@ function skipcoffeeCommand(req, res) {
   rtm.sendMessage(message, channelID)
     .catch(console.error);
   res.send();
-}
-
-function setCoffeeChannel(channelID) {
-  return new Promise((resolve, reject) => {
-    web.conversations.info({ channel: channelID })
-      .then(res => {
-        if (!res.channel.name) {
-          reject('could not find channel name');
-          return;
-        }
-        if (res.channel.name === "general") {
-          reject("you can't do this on #general channel");
-          return;
-        }
-        config.set('channel', channelID);
-        resolve();
-      })
-      .catch(reject);
-  });
 }
 
 function addToRoster(userid) {

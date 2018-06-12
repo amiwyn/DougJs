@@ -65,20 +65,20 @@ describe('generateRandomNumberBetween', () => {
   });
 });
 
-describe('isCoffeeParrotEmoji', () => {
-  it('should detect a coffeparrot', () => {
-    let message = { text: ':coffeeparrot:' };
-    utils.isCoffeeParrotEmoji(message).should.be.true;
-  });
-  it('should not detect a coffeparrot', () => {
-    let message = { text: 'Hello, this is Amanda :coffeeparrot:' };
-    utils.isCoffeeParrotEmoji(message).should.be.false;
-  });
-  it('should detect a string starting with coffeparrot', () => {
-    let message = { text: ':coffeeparrot: its coffee time!' };
-    utils.isCoffeeParrotEmoji(message).should.be.true;
-  });
-});
+// describe('isCoffeeParrotEmoji', () => {
+//   it('should detect a coffeparrot', () => {
+//     let message = { text: ':coffeeparrot:' };
+//     utils.isCoffeeParrotEmoji(message).should.be.true;
+//   });
+//   it('should not detect a coffeparrot', () => {
+//     let message = { text: 'Hello, this is Amanda :coffeeparrot:' };
+//     utils.isCoffeeParrotEmoji(message).should.be.false;
+//   });
+//   it('should detect a string starting with coffeparrot', () => {
+//     let message = { text: ':coffeeparrot: its coffee time!' };
+//     utils.isCoffeeParrotEmoji(message).should.be.true;
+//   });
+// });
 
 describe('getMissingElements', () => {
   it('should be returning empty array', () => {
@@ -126,12 +126,6 @@ describe('updateArray', () => {
 });
 
 describe('addToRoster', () => {
-  it('should be adding to undefined config', () => {
-    config.set('roster', undefined)
-    let expected = ['userid11'];
-    commands.addToRoster('userid11');
-    config.get('roster').should.deep.equal(expected);
-  });
   it('should be adding to empty list', () => {
     config.set('roster', [])
     let expected = ['asdasd1'];

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "CONFIGKEY=test mocha --slow 180 --exit",
-    "start": "CONFIGKEY=bot node src/startup.js"
+    "start": "CONFIGKEY=bot node src/startup.js",
+    "testw": "set CONFIGKEY=test && mocha --slow 180 --exit",
+    "startw": "set CONFIGKEY=bot && node src/startup.js"
   },
   "repository": {
     "type": "git",

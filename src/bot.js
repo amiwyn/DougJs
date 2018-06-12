@@ -4,8 +4,11 @@ const Finity = require('finity');
 const utils = require('./utils');
 const commands = require('./commands');
 
+//TODO: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA CONFIGSTORE IS FUCKING NOT ASYNC GODDAMN ASS STUPID MONKEY APE
+//TODO: change configstore for a database for scaling purposes
+
 //TODO: move configs into commands and configstore
-const coffeeTimeout = 3 * 1000; //time in ms before the bot reminds about the coffee break
+const coffeeTimeout = 30 * 1000; //time in ms before the bot reminds about the coffee break
 const morningCoffeeBreak = 9; //time in hours
 const afternoonCoffeeBreak = 14; //time in hours
 const tolerance = 0.25; //tolerance factor the bot has in hours for coffee time (ex: 14h +- 15 mins)
@@ -85,21 +88,57 @@ function startBot() {
 }
 
 function onMessage(message) {
-  if (isFromSelfBot(message)) {
-    return;
-  }
-
-  if (utils.isCoffeeParrotEmoji(message)) {
-    bot.handle('coffee-parrot-emoji', message.user);
-  }
+  validate(message)
+    .then(isNotFromChannelGeneral)
+    .then(isNotPrivateMessage)
+    .then(isNotFromSelf)
+    .then(isCoffeeParrotEmoji)
+    .then(payload => {
+      if (payload.valid) {
+        bot.handle('coffee-parrot-emoji', message.user);
+      }
+    })
+    .catch(console.error);
 }
 
-function isFromSelfBot(msg) {
-  return msg.user === rtm.activeUserId;
+function validate(message) {
+  return web.conversations.info({ channel: message.channel })
+    .then(res => {
+      return {
+        valid: true,
+        channel: res.channel,
+        message,
+        botId: rtm.activeUserId
+       };
+    });
+}
+
+function isNotPrivateMessage(payload) {
+  payload.valid = payload.valid && !payload.channel.is_im;
+  return payload;
+}
+
+function isNotFromChannelGeneral(payload) {
+  payload.valid = payload.valid && payload.channel.name !== "general";
+  return payload;
+}
+
+function isNotFromSelf(payload) {
+  payload.valid = payload.valid && payload.message.user !== payload.botId;
+  return payload;
+}
+
+function isCoffeeParrotEmoji(payload) {
+  payload.valid = payload.valid && payload.message.text.startsWith(':coffeeparrot:');
+  return payload;
 }
 
 function countParroteer(from, to, context) {
   let userid = context.eventPayload;
+  if (config.get('skippers').some(person => person === userid)) {
+    return;
+  }
+
   utils.updateArray(currentCoffeeParrots, [userid]);
   if (isEveryoneReady()) {
     bot.handle('coffee-fulfill');
@@ -134,8 +173,8 @@ function itsCoffeeTime() {
   hour += date.getMinutes() / 60.0;
   let isMorningBreak = morningCoffeeBreak - tolerance < hour == hour < morningCoffeeBreak + tolerance; 
   let isAfternoonBreak = afternoonCoffeeBreak - tolerance < hour == hour < afternoonCoffeeBreak + tolerance;
-  return isMorningBreak || isAfternoonBreak;
-  //return true;
+  //return isMorningBreak || isAfternoonBreak;
+  return true;
 }
 
 // function sendRandomSlur(channel) {

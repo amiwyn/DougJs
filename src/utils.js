@@ -1,7 +1,3 @@
-function isCoffeeParrotEmoji(msg) {
-  return msg.text.startsWith(':coffeeparrot:');
-}
-
 function generateRandomNumberBetween(low, up) {
   return Math.floor(Math.random() * (up - low) + low);
 }
@@ -28,7 +24,6 @@ function eventError(event, state) {
 }
 
 module.exports = {
-  isCoffeeParrotEmoji,
   generateRandomNumberBetween,
   updateArray,
   getMissingElements,
