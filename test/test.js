@@ -65,21 +65,6 @@ describe('generateRandomNumberBetween', () => {
   });
 });
 
-// describe('isCoffeeParrotEmoji', () => {
-//   it('should detect a coffeparrot', () => {
-//     let message = { text: ':coffeeparrot:' };
-//     utils.isCoffeeParrotEmoji(message).should.be.true;
-//   });
-//   it('should not detect a coffeparrot', () => {
-//     let message = { text: 'Hello, this is Amanda :coffeeparrot:' };
-//     utils.isCoffeeParrotEmoji(message).should.be.false;
-//   });
-//   it('should detect a string starting with coffeparrot', () => {
-//     let message = { text: ':coffeeparrot: its coffee time!' };
-//     utils.isCoffeeParrotEmoji(message).should.be.true;
-//   });
-// });
-
 describe('getMissingElements', () => {
   it('should be returning empty array', () => {
     let a1 = [];
@@ -137,5 +122,50 @@ describe('addToRoster', () => {
     let expected = ['asdasd', 'eiurewirwe', 'asdjkljal', 'newuser11'];
     commands.addToRoster('newuser11');
     config.get('roster').should.deep.equal(expected);
+  });
+});
+
+describe('compareLists', () => {
+  it('should detect the list have the same elements', () => {
+    let a1 = [1,2,3];
+    let a2 = [3,2,1];
+    utils.compareLists(a1, a2).should.be.true;
+  });
+  it('should detect the list have the same elements', () => {
+    let a1 = [1,2,3,6,4,9];
+    let a2 = [9,3,4,2,1,6];
+    utils.compareLists(a1, a2).should.be.true;
+  });
+  it('should detect the list dont have the same elements', () => {
+    let a1 = [2,3,6,4,9,7];
+    let a2 = [9,3,4,2,1,6];
+    utils.compareLists(a1, a2).should.be.false;
+  });
+});
+
+describe('trimLists', () => {
+  it('should trim a list', () => {
+    let a1 = [1,2,3];
+    let a2 = [3,2,1];
+    let expected = [];
+    utils.trimLists(a1, a2).should.deep.equal(expected);
+  });
+  it('should not trim a list with an empty list', () => {
+    let a1 = [1,2,3];
+    let a2 = [];
+    let expected = [1,2,3];
+    utils.trimLists(a1, a2).should.deep.equal(expected);
+  });
+  it('should not trim the list', () => {
+    let a1 = [4,5,6,7,8];
+    let a2 = [1,2,3];
+    let expected = [4,5,6,7,8];
+    utils.trimLists(a1, a2).should.deep.equal(expected);
+  });
+  it('should correctly trim', () => {
+    let a1 = [4,5,6,7];
+    let a2 = [1,2,3,4,5,6];
+    let expected = [7];
+    utils.trimLists(a1, a2).should.deep.equal(expected);
   });
 });

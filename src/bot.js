@@ -4,18 +4,24 @@ const Finity = require('finity');
 const utils = require('./utils');
 const commands = require('./commands');
 
-//TODO: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA CONFIGSTORE IS FUCKING NOT ASYNC GODDAMN ASS STUPID MONKEY APE
-//TODO: change configstore for a database for scaling purposes
-
-//TODO: move configs into commands and configstore
-const coffeeTimeout = 30 * 1000; //time in ms before the bot reminds about the coffee break
-const morningCoffeeBreak = 9; //time in hours
-const afternoonCoffeeBreak = 14; //time in hours
-const tolerance = 0.25; //tolerance factor the bot has in hours for coffee time (ex: 14h +- 15 mins)
+//TODO: trash configstore
 
 const config = new Configstore(process.env.CONFIGKEY);
-const bot = createBotFiniteStateMachine();
 const currentCoffeeParrots = [];
+const skippers = [];
+
+const slurs = ['fuck you', 'bitch']
+
+const GENERALCHANNEL = "general";
+
+const SETTINGS = {
+  coffeeTimeout: 30 * 1000,
+  morningCoffeeBreak: 9,
+  afternoonCoffeeBreak: 14,
+  tolerance: 0.5 
+}
+
+const bot = createBotFiniteStateMachine();
 
 let rtm;
 let web;
@@ -40,15 +46,16 @@ function createBotFiniteStateMachine() {
       .state('coffee-time')
         .onEnter(() => console.log('bot is now in coffee time state'))
         .on('coffee-parrot-emoji').selfTransition().withAction(countParroteer)
-        .on('coffee-fulfill').transitionTo('idle')
+        .on('coffee-fulfill').transitionTo('idle').withAction(sendGo)
         .on('coffee-cancel').transitionTo('idle')
         .on('coffee-postpone').transitionTo('coffee-postponed')
-        .onTimeout(coffeeTimeout).transitionTo('coffee-reminding')
+        .onTimeout(SETTINGS.coffeeTimeout).transitionTo('coffee-reminding')
       .state('coffee-reminding')
         .onEnter(calloutMissingPeople)
         .on('coffee-parrot-emoji').transitionTo('coffee-time').withAction(countParroteer)
         .on('coffee-cancel').transitionTo('idle')
         .on('coffee-postpone').transitionTo('coffee-postponed')
+        .on('coffee-resolve').transitionTo('idle').withAction(sendGo)
       .state('coffee-postponed')
         .onEnter(() => console.log('bot is now postponing break time ...'))
         .on('coffee-postpone').selfTransition()
@@ -56,6 +63,7 @@ function createBotFiniteStateMachine() {
         .on('coffee-cancel').transitionTo('idle')
       .state('flaming')
         .onEnter(() => console.log('roasting somebody'))
+        .on('message').selfTransition().withAction(flame)
         .on('beg-mercy').transitionTo('idle')
       .global()
         .onUnhandledEvent(utils.log.eventError)
@@ -87,12 +95,15 @@ function startBot() {
   });
 }
 
+//ive decided that was really bad, TODO: rewrite this
 function onMessage(message) {
+  bot.handle('message', message);
   validate(message)
     .then(isNotFromChannelGeneral)
     .then(isNotPrivateMessage)
     .then(isNotFromSelf)
     .then(isCoffeeParrotEmoji)
+    .then(isNotSkipper)
     .then(payload => {
       if (payload.valid) {
         bot.handle('coffee-parrot-emoji', message.user);
@@ -119,7 +130,7 @@ function isNotPrivateMessage(payload) {
 }
 
 function isNotFromChannelGeneral(payload) {
-  payload.valid = payload.valid && payload.channel.name !== "general";
+  payload.valid = payload.valid && payload.channel.name !== GENERALCHANNEL;
   return payload;
 }
 
@@ -133,23 +144,22 @@ function isCoffeeParrotEmoji(payload) {
   return payload;
 }
 
+function isNotSkipper(payload) {
+  payload.valid = payload.valid && !(skippers.some(person => person === payload.message.user))
+  return payload;
+}
+
 function countParroteer(from, to, context) {
   let userid = context.eventPayload;
-  if (config.get('skippers').some(person => person === userid)) {
-    return;
-  }
 
   utils.updateArray(currentCoffeeParrots, [userid]);
   if (isEveryoneReady()) {
     bot.handle('coffee-fulfill');
-    config.set('skippers', []);
   }
 }
 
-function isEveryoneReady() {
-  //TODO: check everyone one by one instead of this shit
-  return currentCoffeeParrots.length === config.get('roster').length - config.get('skippers').length;
-}
+const isEveryoneReady = () => 
+  utils.compareLists(utils.trimLists(config.get('roster'), skippers), currentCoffeeParrots)
 
 function calloutMissingPeople() {
   console.log('bot is now reminding');
@@ -161,19 +171,36 @@ function calloutMissingPeople() {
 
 function getMissingPeopleMessage() {
   let roster = config.get('roster');
-  let missing = utils.getMissingElements(currentCoffeeParrots, roster);
-  let message = `*${currentCoffeeParrots.length}/${roster.length}* - `;
+  let missing = utils.trimLists(roster, currentCoffeeParrots);
+  missing = utils.trimLists(missing, skippers);
+
+  let message = `*${currentCoffeeParrots.length}/${roster.length - skippers.length}* - `;
   missing.forEach(person => message += utils.userMention(person) + " ");
   return message;
 }
 
 function itsCoffeeTime() {
-  let date = new Date();
-  let hour = date.getHours();
-  hour += date.getMinutes() / 60.0;
-  let isMorningBreak = morningCoffeeBreak - tolerance < hour == hour < morningCoffeeBreak + tolerance; 
-  let isAfternoonBreak = afternoonCoffeeBreak - tolerance < hour == hour < afternoonCoffeeBreak + tolerance;
+  let isMorningBreak = utils.isHourWithinTolerance(SETTINGS.morningCoffeeBreak, SETTINGS.tolerance);
+  let isAfternoonBreak = utils.isHourWithinTolerance(SETTINGS.afternoonCoffeeBreak, SETTINGS.tolerance);
   return isMorningBreak || isAfternoonBreak;
+}
+
+function sendGo(from, to, context) {
+  currentCoffeeParrots.length = 0;
+  skippers.length = 0;
+  let message = '<!here> GO'
+  rtm.sendMessage(message, config.get('channel'))
+    .catch(console.error);
+}
+
+function updateSettings(configName, content) {
+  //no validation whatsoever ¯\_(ツ)_/¯
+  SETTINGS[configName] = content;
+  return SETTINGS;
+}
+
+function flame(from, to, context) {
+  let userid = context.eventPayload;
 }
 
 // function sendRandomSlur(channel) {
@@ -210,12 +237,14 @@ function itsCoffeeTime() {
 module.exports = {
   start: (webserver) => {
     this.expressApp = webserver;
+    this.updateSettings = updateSettings;
+    this.automata = bot;
+    this.addSkipper = skipper => utils.updateArray(skippers, [skipper]),
     bot.handle('start-bot');
   },
-  
-  automata : bot,
+
   itsCoffeeTime,
-  morningCoffeeBreak, 
-  afternoonCoffeeBreak, 
-  tolerance
+  morningCoffeeBreak: SETTINGS.morningCoffeeBreak, 
+  afternoonCoffeeBreak: SETTINGS.afternoonCoffeeBreak, 
+  tolerance: SETTINGS.tolerance
 };
