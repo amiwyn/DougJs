@@ -20,6 +20,8 @@ function init(api) {
   bot.expressApp.post('/cmd/configure', configureCommand);
   bot.expressApp.post('/cmd/resolve', resolveCommand);
   bot.expressApp.post('/cmd/skipsomeone', skipsomeoneCommand);
+  bot.expressApp.post('/cmd/joinsomeone', joinsomeoneCommand);
+  bot.expressApp.post('/cmd/addslur', addslurCommand);
   rtm = api.rtm;
   web = api.web;
 }
@@ -29,8 +31,7 @@ function flameCommand(req, res) {
   let channelid = req.body.channel_id;
   let message = "fuck you, " + utils.userMention(userid);
   rtm.sendMessage(message, channelid);
-  //bot.handle('flame-command', userid);
-  //res.send("I might flame you but I still love you, :kissing_heart:");
+  res.send();
 }
 
 function mercyCommand(req, res) {
@@ -104,9 +105,9 @@ function resolveCommand(req, res) {
 function skipsomeoneCommand(req, res) {
   isAdmin(req.body.user_id)
   .then(() => {
-    let userid = getUserIdFromCommandArgument(req.body.text);
+    let userid = utils.getUserIdFromCommandArgument(req.body.text);
     let channelId = req.body.channel_id;
-    skipUserWithMention(userid, channelId);
+    bot.skipUserWithMention(userid, channelId);
     res.send();
   })
   .catch(error => {
@@ -114,17 +115,20 @@ function skipsomeoneCommand(req, res) {
   });
 }
 
-function getUserIdFromCommandArgument(text) {
-  let tokens = text.split("|");
-  return tokens[0].substring(2);
+function joinsomeoneCommand(req, res) {
+  let channelId = req.body.channel_id;
+  isAdmin(req.body.user_id)
+  .then(() => {
+    let userid = utils.getUserIdFromCommandArgument(req.body.text);
+    addToRoster(userid);
+    return `${utils.userMention(userid)} joined coffee break`;
+  })
+  .then(message => rtm.sendMessage(message, channelId))
+  .then(() => res.send())
+  .catch(error => {
+    res.send(`beep boop, its not working : ${error}`);
+  });
 }
-
-function skipUserWithMention(userid, channelid) {
-  bot.addSkipper(userid);
-  let message = `${utils.userMention(userid)} will skip coffee break`;
-  rtm.sendMessage(message, channelid)
-    .catch(console.error);
-} 
 
 module.exports = {
   init,

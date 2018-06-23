@@ -10,8 +10,6 @@ const config = new Configstore(process.env.CONFIGKEY);
 const currentCoffeeParrots = [];
 const skippers = [];
 
-const slurs = ['fuck you', 'bitch']
-
 const GENERALCHANNEL = "general";
 
 const SETTINGS = {
@@ -165,8 +163,9 @@ function calloutMissingPeople() {
   console.log('bot is now reminding');
   let message = getMissingPeopleMessage();
 
-  rtm.sendMessage(message, config.get('channel'))
-    .catch(console.error);
+  getChannel()
+  .then(channel => rtm.sendMessage(message, channel))
+  .catch(console.error);
 }
 
 function getMissingPeopleMessage() {
@@ -189,62 +188,43 @@ function sendGo(from, to, context) {
   currentCoffeeParrots.length = 0;
   skippers.length = 0;
   let message = '<!here> GO'
-  rtm.sendMessage(message, config.get('channel'))
+  getChannel()
+    .then(channel => rtm.sendMessage(message, channel))
     .catch(console.error);
 }
 
-function updateSettings(configName, content) {
+function flame(from, to, context) {
+  let userid = context.eventPayload;
+  //then proceed to spam in DM 
+}
+
+function getChannel() {
+  new Promise((resolve, reject) => {
+    let channel = config.get('channel');
+    resolve(channel);
+  });
+}
+
+exports.updateSettings = (configName, content) => {
   //no validation whatsoever ¯\_(ツ)_/¯
   SETTINGS[configName] = content;
   return SETTINGS;
 }
 
-function flame(from, to, context) {
-  let userid = context.eventPayload;
+exports.skipUserWithMention = (userid, channelid) => {
+  utils.updateArray(skippers, [userid])
+  let message = `${utils.userMention(userid)} will skip coffee break`;
+  rtm.sendMessage(message, channelid)
+    .catch(console.error);
 }
 
-// function sendRandomSlur(channel) {
-//   return new Promise((resolve, reject) => {
-//     try {
-//       let slur = getRandomSlur();
-//     }
-//     catch(error) {
-//       reject(error);
-//     }
+exports.start = (webserver) => {
+  bot.handle('start-bot');
+  exports.expressApp = webserver;
+}
 
-//     rtm.sendMessage(slur, channel)
-//     .then((res) => {
-//       resolve('sent msg id: '+ res.ts);
-//     })
-//     .catch(reject);
-//   });
-// }
-
-// function getRandomSlur() {
-//   let slurs = getSlurs();
-//   let index = utils.generateRandomNumberBetween(0, slurs.length);
-//   return slurs[index];
-// }
-
-// function getSlurs() {
-//   if (!config.get('slurs')) {
-//     throw "Cannot obtain slurs in configs";
-//   }
-//   return config.get('slurs');
-// }
-
-//gotta work on those exports
-module.exports = {
-  start: (webserver) => {
-    this.expressApp = webserver;
-    this.updateSettings = updateSettings;
-    this.automata = bot;
-    this.addSkipper = skipper => utils.updateArray(skippers, [skipper]),
-    bot.handle('start-bot');
-  },
-
-  itsCoffeeTime,
-  morningCoffeeBreak: SETTINGS.morningCoffeeBreak, 
-  afternoonCoffeeBreak: SETTINGS.afternoonCoffeeBreak, 
-  tolerance: SETTINGS.tolerance
-};
+exports.automata = bot;
+exports.itsCoffeeTime = itsCoffeeTime;
+exports.morningCoffeeBreak = SETTINGS.morningCoffeeBreak;
+exports.afternoonCoffeeBreak = SETTINGS.afternoonCoffeeBreak;
+exports.tolerance = SETTINGS.tolerance;
