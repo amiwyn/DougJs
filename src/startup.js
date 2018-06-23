@@ -8,7 +8,7 @@ const auth = require('./auth-bot');
 const config = new Configstore(process.env.CONFIGKEY);
 const app = express();
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log("HTTP server listening on", process.env.PORT);
   seedConfigs();
   app.use(bodyParser.json());
