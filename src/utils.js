@@ -35,4 +35,4 @@ exports.getUserIdFromCommandArgument = text => {
   return tokens[0].substring(2);
 }
 
-// exports.formatTextWithUser = (text, userid) => 
+exports.formatTextWithUser = (text, userid) => text.replace("{user}", exports.userMention(userid))

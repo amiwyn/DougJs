@@ -1,4 +1,5 @@
 const Configstore = require('configstore');
+const store = require('./store');
 const utils = require('./utils');
 const bot = require('./bot');
 
@@ -27,7 +28,7 @@ function init(api) {
 }
 
 function flameCommand(req, res) {
-  let userid = getUserIdFromCommandArgument(req.body.text);
+  let userid = utils.getUserIdFromCommandArgument(req.body.text);
   let channelid = req.body.channel_id;
   let message = "fuck you, " + utils.userMention(userid);
   rtm.sendMessage(message, channelid);
@@ -49,7 +50,7 @@ function joincoffeeCommand(req, res) {
         return Promise.reject("you can't do this on #general channel");
       }
       config.set('channel', channelID);
-      addToRoster(userid);
+      store.addToRoster(userid);
       return `${utils.userMention(userid)} joined coffee break`;
     })
     .then(message => rtm.sendMessage(message, channelID))
@@ -62,14 +63,8 @@ function joincoffeeCommand(req, res) {
 function skipcoffeeCommand(req, res) {
   let userid = req.body.user_id;
   let channelId = req.body.channel_id;
-  skipUserWithMention(userid, channelId);
+  bot.skipUserWithMention(userid, channelId);
   res.send();
-}
-
-function addToRoster(userid) {
-  let useridList = config.get('roster');
-  utils.updateArray(useridList, [userid]);
-  config.set('roster', useridList);
 }
 
 function configureCommand(req, res) {
@@ -120,7 +115,7 @@ function joinsomeoneCommand(req, res) {
   isAdmin(req.body.user_id)
   .then(() => {
     let userid = utils.getUserIdFromCommandArgument(req.body.text);
-    addToRoster(userid);
+    store.addToRoster(userid);
     return `${utils.userMention(userid)} joined coffee break`;
   })
   .then(message => rtm.sendMessage(message, channelId))
@@ -130,7 +125,15 @@ function joinsomeoneCommand(req, res) {
   });
 }
 
+function addslurCommand(req, res) {
+  let slur = req.body.text;
+  store.addSlur(slur)
+    .then(() => res.send("slur added to the list"))
+    .catch(error => {
+      res.send(`beep boop, its not working : ${error}`);
+    });
+}
+
 module.exports = {
   init,
-  addToRoster
 };

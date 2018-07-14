@@ -16,7 +16,8 @@ const SETTINGS = {
   coffeeTimeout: 30 * 1000,
   morningCoffeeBreak: 9,
   afternoonCoffeeBreak: 14,
-  tolerance: 0.5 
+  tolerance: 0.5,
+  coffeeTimeDuration: 15 * 60 * 1000
 }
 
 const bot = createBotFiniteStateMachine();
@@ -44,7 +45,7 @@ function createBotFiniteStateMachine() {
       .state('coffee-time')
         .onEnter(() => console.log('bot is now in coffee time state'))
         .on('coffee-parrot-emoji').selfTransition().withAction(countParroteer)
-        .on('coffee-fulfill').transitionTo('idle').withAction(sendGo)
+        .on('coffee-fulfill').transitionTo('coffee-break').withAction(sendGo)
         .on('coffee-cancel').transitionTo('idle')
         .on('coffee-postpone').transitionTo('coffee-postponed')
         .onTimeout(SETTINGS.coffeeTimeout).transitionTo('coffee-reminding')
@@ -53,12 +54,15 @@ function createBotFiniteStateMachine() {
         .on('coffee-parrot-emoji').transitionTo('coffee-time').withAction(countParroteer)
         .on('coffee-cancel').transitionTo('idle')
         .on('coffee-postpone').transitionTo('coffee-postponed')
-        .on('coffee-resolve').transitionTo('idle').withAction(sendGo)
+        .on('coffee-resolve').transitionTo('coffee-break').withAction(sendGo)
       .state('coffee-postponed')
         .onEnter(() => console.log('bot is now postponing break time ...'))
         .on('coffee-postpone').selfTransition()
         .on('coffee-resume').transitionTo('coffee-time')//.withAction(resetCount)
         .on('coffee-cancel').transitionTo('idle')
+      .state('coffee-break')
+        .onEnter(() => console.log('entering coffee time'))
+        .onTimeout(SETTINGS.coffeeTimeDuration).transitionTo('idle').withAction(endBreak)
       .state('flaming')
         .onEnter(() => console.log('roasting somebody'))
         .on('message').selfTransition().withAction(flame)
@@ -187,7 +191,14 @@ function itsCoffeeTime() {
 function sendGo(from, to, context) {
   currentCoffeeParrots.length = 0;
   skippers.length = 0;
-  let message = '<!here> GO'
+  let message = "Alright, let's do this. <!here> GO!"
+  getChannel()
+    .then(channel => rtm.sendMessage(message, channel))
+    .catch(console.error);
+}
+
+function endBreak(from, to, context) {
+  let message = '<!here> Go back to work, ya bunch o lazy dogs'
   getChannel()
     .then(channel => rtm.sendMessage(message, channel))
     .catch(console.error);
@@ -199,7 +210,7 @@ function flame(from, to, context) {
 }
 
 function getChannel() {
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     let channel = config.get('channel');
     resolve(channel);
   });
