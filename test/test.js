@@ -110,20 +110,20 @@ describe('updateArray', () => {
   });
 });
 
-describe('addToRoster', () => {
-  it('should be adding to empty list', () => {
-    config.set('roster', [])
-    let expected = ['asdasd1'];
-    commands.addToRoster('asdasd1');
-    config.get('roster').should.deep.equal(expected);
-  });
-  it('should be adding to existing list', () => {
-    config.set('roster', ['asdasd', 'eiurewirwe', 'asdjkljal'])
-    let expected = ['asdasd', 'eiurewirwe', 'asdjkljal', 'newuser11'];
-    commands.addToRoster('newuser11');
-    config.get('roster').should.deep.equal(expected);
-  });
-});
+// describe('addToRoster', () => {
+//   it('should be adding to empty list', () => {
+//     config.set('roster', [])
+//     let expected = ['asdasd1'];
+//     commands.addToRoster('asdasd1');
+//     config.get('roster').should.deep.equal(expected);
+//   });
+//   it('should be adding to existing list', () => {
+//     config.set('roster', ['asdasd', 'eiurewirwe', 'asdjkljal'])
+//     let expected = ['asdasd', 'eiurewirwe', 'asdjkljal', 'newuser11'];
+//     commands.addToRoster('newuser11');
+//     config.get('roster').should.deep.equal(expected);
+//   });
+// });
 
 describe('compareLists', () => {
   it('should detect the list have the same elements', () => {
@@ -187,5 +187,13 @@ describe('formatTextWithUser', () => {
     let userid = "123"
     let expected = "hello <@123> {user} {user} {user}";
     utils.formatTextWithUser(text, userid).should.deep.equal(expected);
+  });
+});
+
+describe('userMention', () => {
+  it('should return string incased with @<>', () => {
+    let text = "test";
+    let expected = "<@test>"
+    utils.userMention(text).should.deep.equal(expected);
   });
 });

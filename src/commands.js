@@ -93,8 +93,15 @@ function getArgsFromText(text) {
 }
 
 function resolveCommand(req, res) {
-  bot.automata.handle('coffee-resolve');
-  res.send();
+  isAdmin(req.body.user_id)
+  .then(() => {
+    bot.automata.handle('coffee-resolve');
+    res.send();
+  })
+  .catch(error => {
+    res.send(`beep boop, its not working : ${error}`);
+  });
+
 }
 
 function skipsomeoneCommand(req, res) {
