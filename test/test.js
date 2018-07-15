@@ -197,3 +197,11 @@ describe('userMention', () => {
     utils.userMention(text).should.deep.equal(expected);
   });
 });
+
+describe('getUserIdFromCommandArgument', () => {
+  it('should return a userid', () => {
+    let text = "<@U1234567|user>";
+    let expected = "U1234567"
+    utils.getUserIdFromCommandArgument(text).should.deep.equal(expected);
+  });
+});

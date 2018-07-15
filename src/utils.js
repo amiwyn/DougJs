@@ -26,13 +26,21 @@ exports.isHourWithinTolerance = (hour, tolerance) => {
 exports.compareLists = (list1, list2) =>
   list1.every(elem1 => list2.some(elem2 => elem1 === elem2))
 
-
 exports.trimLists = (list1, list2) =>
   list1.filter(elem1 => !list2.some(elem2 => elem1 === elem2))
 
 exports.getUserIdFromCommandArgument = text => {
   let tokens = text.split("|");
-  return tokens[0].substring(2);
+  let id = tokens[0].substring(2);
+  if (id.length === 0) {
+    throw "invalid userid"
+  }
+  return id;
+}
+
+exports.generateRandomInsult = (slurs, userid) => {
+  let id = exports.generateRandomNumberBetween(0, slurs.length);
+  return exports.formatTextWithUser(slurs[id], userid);
 }
 
 exports.formatTextWithUser = (text, userid) => text.replace("{user}", exports.userMention(userid))

@@ -6,6 +6,7 @@ const bot = require('./bot');
 const config = new Configstore(process.env.CONFIGKEY);
 const GENERALCHANNEL = "general";
 const WHITESPACE = " ";
+const DOUG_ERRMSG = 'beep boop, its not working : ';
 let rtm; 
 let web;
 
@@ -30,9 +31,15 @@ function init(api) {
 function flameCommand(req, res) {
   let userid = utils.getUserIdFromCommandArgument(req.body.text);
   let channelid = req.body.channel_id;
-  let message = "fuck you, " + utils.userMention(userid);
-  rtm.sendMessage(message, channelid);
-  res.send();
+  store.getSlurs()
+    .then(slurs => {
+      let message = utils.generateRandomInsult(slurs, userid);
+      rtm.sendMessage(message, channelid);
+      res.send();
+    })
+    .catch(error => {
+      res.send(DOUG_ERRMSG + error);
+    });
 }
 
 function mercyCommand(req, res) {
@@ -56,7 +63,7 @@ function joincoffeeCommand(req, res) {
     .then(message => rtm.sendMessage(message, channelID))
     .then(() => res.send())
     .catch(error => {
-      res.send(`beep boop, its not working : ${error}`);
+      res.send(DOUG_ERRMSG + error);
     });
 }
 
@@ -75,14 +82,13 @@ function configureCommand(req, res) {
     })
     .then(settings => res.send(settings))
     .catch(error => {
-      res.send(`beep boop, its not working : ${error}`);
+      res.send(DOUG_ERRMSG + error);
     });
 }
 
 const isAdmin = (userid) => 
   web.users.info({ user: userid })
     .then(info => !info.user.is_admin ? Promise.reject("you are not an admin") : undefined)
-
 
 function getArgsFromText(text) {
   let tokens = text.split(WHITESPACE);
@@ -99,9 +105,8 @@ function resolveCommand(req, res) {
     res.send();
   })
   .catch(error => {
-    res.send(`beep boop, its not working : ${error}`);
+    res.send(DOUG_ERRMSG + error);
   });
-
 }
 
 function skipsomeoneCommand(req, res) {
@@ -113,7 +118,7 @@ function skipsomeoneCommand(req, res) {
     res.send();
   })
   .catch(error => {
-    res.send(`beep boop, its not working : ${error}`);
+    res.send(DOUG_ERRMSG + error);
   });
 }
 
@@ -128,7 +133,7 @@ function joinsomeoneCommand(req, res) {
   .then(message => rtm.sendMessage(message, channelId))
   .then(() => res.send())
   .catch(error => {
-    res.send(`beep boop, its not working : ${error}`);
+    res.send(DOUG_ERRMSG + error);
   });
 }
 
@@ -137,7 +142,7 @@ function addslurCommand(req, res) {
   store.addSlur(slur)
     .then(() => res.send("slur added to the list"))
     .catch(error => {
-      res.send(`beep boop, its not working : ${error}`);
+      res.send(DOUG_ERRMSG + error);
     });
 }
 
