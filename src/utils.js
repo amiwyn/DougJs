@@ -9,6 +9,13 @@ exports.updateArray = (original, data) => {
   original.push(...nodups);
 }
 
+exports.addUntilLimit = (array, limit, element) => {
+  exports.updateArray(array, [element]);
+  if (array.length > limit) {
+    array.shift()
+  }
+}
+
 exports.userMention = userid => `<@${userid}>`;
 
 exports.log = {
@@ -44,3 +51,19 @@ exports.generateRandomInsult = (slurs, userid) => {
 }
 
 exports.formatTextWithUser = (text, userid) => text.replace("{user}", exports.userMention(userid))
+
+exports.reverseUserMention = (message) => {
+  return message.replace(/<@[a-z0-9]*>/i, '{user}')
+}
+
+exports.getDeletedSlursMessage = (slurs) => {
+  return [{
+    "fallback": "The following slurs have been cleaned up",
+    "color": "#e05f28",
+    "pretext": "The following slurs have been cleaned up",
+    "fields": slurs.map(slur => ({
+      "title": slur,
+      "short": false
+    }))
+  }]
+}

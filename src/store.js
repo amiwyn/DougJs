@@ -26,6 +26,13 @@ exports.getSlurs = () => {
   });
 }
 
+exports.setSlurs = slurs => {
+  return new Promise((resolve, reject) => {
+    config.set('slurs', slurs)
+    resolve();
+  });
+}
+
 exports.addSlur = slur => {
   return new Promise((resolve, reject) => {
     let slurs = config.get('slurs');
@@ -46,5 +53,15 @@ exports.addToRoster = userid => {
     let useridList = config.get('roster');
     utils.updateArray(useridList, [userid]);
     config.set('roster', useridList);
+    resolve();
+  });
+}
+
+exports.removeFromRoster = userid => {
+  return new Promise((resolve, reject) => {
+    let useridList = config.get('roster');
+    useridList = utils.filter(user => user === userid);
+    config.set('roster', useridList);
+    resolve();
   });
 }

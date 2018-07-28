@@ -217,7 +217,6 @@ function getChannel() {
 }
 
 exports.updateSettings = (configName, content) => {
-  //no validation whatsoever ¯\_(ツ)_/¯
   SETTINGS[configName] = content;
   return SETTINGS;
 }

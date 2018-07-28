@@ -127,44 +127,44 @@ describe('updateArray', () => {
 
 describe('compareLists', () => {
   it('should detect the list have the same elements', () => {
-    let a1 = [1,2,3];
-    let a2 = [3,2,1];
+    let a1 = [1, 2, 3];
+    let a2 = [3, 2, 1];
     utils.compareLists(a1, a2).should.be.true;
   });
   it('should detect the list have the same elements', () => {
-    let a1 = [1,2,3,6,4,9];
-    let a2 = [9,3,4,2,1,6];
+    let a1 = [1, 2, 3, 6, 4, 9];
+    let a2 = [9, 3, 4, 2, 1, 6];
     utils.compareLists(a1, a2).should.be.true;
   });
   it('should detect the list dont have the same elements', () => {
-    let a1 = [2,3,6,4,9,7];
-    let a2 = [9,3,4,2,1,6];
+    let a1 = [2, 3, 6, 4, 9, 7];
+    let a2 = [9, 3, 4, 2, 1, 6];
     utils.compareLists(a1, a2).should.be.false;
   });
 });
 
 describe('trimLists', () => {
   it('should trim a list', () => {
-    let a1 = [1,2,3];
-    let a2 = [3,2,1];
+    let a1 = [1, 2, 3];
+    let a2 = [3, 2, 1];
     let expected = [];
     utils.trimLists(a1, a2).should.deep.equal(expected);
   });
   it('should not trim a list with an empty list', () => {
-    let a1 = [1,2,3];
+    let a1 = [1, 2, 3];
     let a2 = [];
-    let expected = [1,2,3];
+    let expected = [1, 2, 3];
     utils.trimLists(a1, a2).should.deep.equal(expected);
   });
   it('should not trim the list', () => {
-    let a1 = [4,5,6,7,8];
-    let a2 = [1,2,3];
-    let expected = [4,5,6,7,8];
+    let a1 = [4, 5, 6, 7, 8];
+    let a2 = [1, 2, 3];
+    let expected = [4, 5, 6, 7, 8];
     utils.trimLists(a1, a2).should.deep.equal(expected);
   });
   it('should correctly trim', () => {
-    let a1 = [4,5,6,7];
-    let a2 = [1,2,3,4,5,6];
+    let a1 = [4, 5, 6, 7];
+    let a2 = [1, 2, 3, 4, 5, 6];
     let expected = [7];
     utils.trimLists(a1, a2).should.deep.equal(expected);
   });
@@ -203,5 +203,34 @@ describe('getUserIdFromCommandArgument', () => {
     let text = "<@U1234567|user>";
     let expected = "U1234567"
     utils.getUserIdFromCommandArgument(text).should.deep.equal(expected);
+  });
+});
+
+describe('reverseUserMention', () => {
+  it('should return the string without the usermention', () => {
+    let text = "<@U1234567> devrais commencer par ecrire dans le bon sens";
+    let expected = "{user} devrais commencer par ecrire dans le bon sens";
+    utils.reverseUserMention(text).should.deep.equal(expected);
+  });
+});
+
+describe('addUntilLimit', () => {
+  it('should append an element', () => {
+    let a1 = [1, 2, 3];
+    let expected = [1, 2, 3, 4];
+    utils.addUntilLimit(a1, 5, 4)
+    a1.should.deep.equal(expected);
+  });
+  it('should append and shift when full', () => {
+    let a1 = [1, 2, 3];
+    let expected = [2, 3, 4];
+    utils.addUntilLimit(a1, 3, 4)
+    a1.should.deep.equal(expected);
+  });
+  it('should not add twice', () => {
+    let a1 = [1, 2, 3];
+    let expected = [1, 2, 3];
+    utils.addUntilLimit(a1, 3, 3)
+    a1.should.deep.equal(expected);
   });
 });

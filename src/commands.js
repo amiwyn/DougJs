@@ -7,10 +7,14 @@ const config = new Configstore(process.env.CONFIGKEY);
 const GENERALCHANNEL = "general";
 const WHITESPACE = " ";
 const DOUG_ERRMSG = 'beep boop, its not working : ';
+const VOTE_UP = '+1';
+const VOTE_DOWN = '-1';
+const FLAME_RECENT_LIMIT = 10;  
+
 let rtm; 
 let web;
+let recentFlame = [];
 
-//TODO: more commands
 function init(api) {
   bot.expressApp.post('/cmd/joincoffee', joincoffeeCommand); //TODO: make join command remove user from skippers
   bot.expressApp.post('/cmd/skipcoffee', skipcoffeeCommand);
@@ -24,8 +28,13 @@ function init(api) {
   bot.expressApp.post('/cmd/skipsomeone', skipsomeoneCommand);
   bot.expressApp.post('/cmd/joinsomeone', joinsomeoneCommand);
   bot.expressApp.post('/cmd/addslur', addslurCommand);
+  bot.expressApp.post('/cmd/cleanup', cleanupCommand);
+  //bot.expressApp.post('/cmd/kick', kickCommand); gotta test this before anything
   rtm = api.rtm;
   web = api.web;
+
+  rtm.on('reaction_added', reactionAdd);
+  rtm.on('reaction_removed', reactionRemove);
 }
 
 function flameCommand(req, res) {
@@ -33,13 +42,93 @@ function flameCommand(req, res) {
   let channelid = req.body.channel_id;
   store.getSlurs()
     .then(slurs => {
-      let message = utils.generateRandomInsult(slurs, userid);
-      rtm.sendMessage(message, channelid);
-      res.send();
+      let message = utils.generateRandomInsult(slurs, userid)
+      return rtm.sendMessage(message, channelid)
     })
+    .then(msg => {
+      msg.score = 0;
+      utils.addUntilLimit(recentFlame, FLAME_RECENT_LIMIT, msg);
+      return web.reactions.add({ name: VOTE_UP, channel: channelid, timestamp: msg.ts})
+        .then(() => web.reactions.add({ name: VOTE_DOWN, channel: channelid, timestamp: msg.ts}))
+    })
+    .then(() => res.send())
     .catch(error => {
       res.send(DOUG_ERRMSG + error);
     });
+}
+
+function reactionRemove(event) {
+  setReaction(event, -1)
+}
+
+function reactionAdd(event) {
+  setReaction(event, 1)
+}
+
+function setReaction(event, modifier) {
+  if (isInvalidReaction(event)) {
+    return;
+  }
+
+  let slur = recentFlame.find(elem => elem.ts === event.item.ts)
+  if (!slur)
+    return;
+
+  if (event.reaction === VOTE_UP) {
+    slur.score += modifier;
+  } else {
+    slur.score -= modifier;
+  }
+}
+
+function isInvalidReaction(message) {
+  return (message.user === rtm.activeUserId || (message.reaction !== VOTE_UP && message.reaction !== VOTE_DOWN))
+}
+
+function cleanupCommand(req, res) {
+  let toRemove = [];
+  isAdmin(req.body.user_id)
+  .then(() => {
+    recentFlame.forEach(msg => {
+      if (msg.score < 0) {
+        toRemove.push(utils.reverseUserMention(msg.text))
+      }
+    })
+    if (toRemove.length === 0) { 
+      throw "nothing to cleanup, all your slurs are clean :)"
+    }
+    return store.getSlurs();
+  })
+  .then(slurs => {
+    slurs = utils.trimLists(slurs, toRemove)
+    return store.setSlurs(slurs)
+  })
+  .then(() => {
+    recentFlame = [];
+    let attachments = utils.getDeletedSlursMessage(toRemove)
+    web.chat.postMessage({ channel: req.body.channel_id, attachments });
+    res.send()
+  })
+  .catch(error => {
+    res.send(DOUG_ERRMSG + error);
+  });
+}
+
+function kickCommand(req, res) {
+  isAdmin(req.body.user_id)
+  .then(() => {
+    let userid = utils.getUserIdFromCommandArgument(req.body.text);
+    let channelId = req.body.channel_id;
+    return store.removeFromRoster(userid);
+  })
+  .then(() => {
+    let message = utils.userMention(userid) + " was kicked from the list :("
+    rtm.sendMessage(message, channelId)
+    res.send();
+  })
+  .catch(error => {
+    res.send(DOUG_ERRMSG + error);
+  });
 }
 
 function mercyCommand(req, res) {
