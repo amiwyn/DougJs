@@ -170,23 +170,33 @@ describe('trimLists', () => {
   });
 });
 
-describe('formatTextWithUser', () => {
+describe('formatTextTokens', () => {
+  let userid = "123"
+  let users = ['456']
   it('should return same string', () => {
     let text = "hello asd iqwo9if qfiqnfoqnf sfklasf";
-    let userid = "123"
-    utils.formatTextWithUser(text, userid).should.deep.equal(text);
+    utils.formatTextTokens(text, userid, users).should.deep.equal(text);
   });
   it('should replace {user}', () => {
     let text = "hello this is {user}! nice to meet you";
-    let userid = "123"
     let expected = "hello this is <@123>! nice to meet you";
-    utils.formatTextWithUser(text, userid).should.deep.equal(expected);
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
   });
-  it('should not replace multiple times', () => {
+  it('should replace multiple times', () => {
     let text = "hello {user} {user} {user} {user}";
-    let userid = "123"
-    let expected = "hello <@123> {user} {user} {user}";
-    utils.formatTextWithUser(text, userid).should.deep.equal(expected);
+    let expected = "hello <@123> <@123> <@123> <@123>";
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
+  });
+  it('should replace {random} token multiple times', () => {
+    let text = "hello {user} {random} {user} {random}";
+    let expected = "hello <@123> <@456> <@123> <@456>";
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
+  });
+  it('should replace {random} token without the user', () => {
+    let text = "hello {user} {random} {user} {random}";
+    let expected = "hello <@123> <@456> <@123> <@456>";
+    users = ['456', '123']
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
   });
 });
 
@@ -208,8 +218,13 @@ describe('getUserIdFromCommandArgument', () => {
 
 describe('reverseUserMention', () => {
   it('should return the string without the usermention', () => {
-    let text = "<@U1234567> devrais commencer par ecrire dans le bon sens";
-    let expected = "{user} devrais commencer par ecrire dans le bon sens";
+    let text = "<@U1234567> devrait commencer par ecrire dans le bon sens";
+    let expected = "{user} devrait commencer par ecrire dans le bon sens";
+    utils.reverseUserMention(text).should.deep.equal(expected);
+  });
+  it('should return the string without all the usermentions', () => {
+    let text = "<@U1234567> devrait commencer par ecrire dans le bon sens <@U1234567>";
+    let expected = "{user} devrait commencer par ecrire dans le bon sens {user}";
     utils.reverseUserMention(text).should.deep.equal(expected);
   });
 });
@@ -232,5 +247,13 @@ describe('addUntilLimit', () => {
     let expected = [1, 2, 3];
     utils.addUntilLimit(a1, 3, 3)
     a1.should.deep.equal(expected);
+  });
+});
+
+describe('generateRandomUserMention', () => {
+  it('should mention user 123', () => {
+    let users = ['123', '123'];
+    let expected = utils.userMention('123')
+    utils.generateRandomUserMention(users).should.deep.equal(expected);
   });
 });

@@ -22,7 +22,8 @@ exports.seedConfigs = () => {
 
 exports.getSlurs = () => {
   return new Promise((resolve, reject) => {
-    resolve(config.get('slurs'));
+    let slurs = config.get('slurs')
+    resolve(slurs);
   });
 }
 
@@ -44,7 +45,8 @@ exports.addSlur = slur => {
 
 exports.getRoster = () => {
   return new Promise((resolve, reject) => {
-    resolve(config.get('roster'));
+    let users = config.get('roster')
+    resolve(users);
   });
 }
 

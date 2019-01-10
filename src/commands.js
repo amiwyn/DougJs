@@ -40,14 +40,16 @@ function init(api) {
 function flameCommand(req, res) {
   let userid = utils.getUserIdFromCommandArgument(req.body.text);
   let channelid = req.body.channel_id;
-  store.getSlurs()
-    .then(slurs => {
-      let message = utils.generateRandomInsult(slurs, userid)
-      return rtm.sendMessage(message, channelid)
+  Promise.all([store.getRoster(), store.getSlurs()])
+    .then(([users, slurs]) => {
+      let message = utils.generateRandomInsult(slurs, userid, users)
+      let msg = rtm.sendMessage(message, channelid)
+      msg.text = message
+      return msg
     })
     .then(msg => {
-      msg.score = 0;
-      utils.addUntilLimit(recentFlame, FLAME_RECENT_LIMIT, msg);
+      msg.score = 0
+      utils.addUntilLimit(recentFlame, FLAME_RECENT_LIMIT, msg)
       return web.reactions.add({ name: VOTE_UP, channel: channelid, timestamp: msg.ts})
         .then(() => web.reactions.add({ name: VOTE_DOWN, channel: channelid, timestamp: msg.ts}))
     })

@@ -45,15 +45,18 @@ exports.getUserIdFromCommandArgument = text => {
   return id;
 }
 
-exports.generateRandomInsult = (slurs, userid) => {
+exports.generateRandomInsult = (slurs, userid, users) => {
   let id = exports.generateRandomNumberBetween(0, slurs.length);
-  return exports.formatTextWithUser(slurs[id], userid);
+  return exports.formatTextTokens(slurs[id], userid, users);
 }
 
-exports.formatTextWithUser = (text, userid) => text.replace("{user}", exports.userMention(userid))
+exports.formatTextTokens = (text, userid, users) => {
+  text = text.replace(/{user}/g, exports.userMention(userid))
+  return text.replace(/{random}/g, exports.generateRandomUserMention(users, userid))
+}
 
 exports.reverseUserMention = (message) => {
-  return message.replace(/<@[a-z0-9]*>/i, '{user}')
+  return message.replace(/<@[a-z0-9]*>/gi, '{user}')
 }
 
 exports.getDeletedSlursMessage = (slurs) => {
@@ -66,4 +69,10 @@ exports.getDeletedSlursMessage = (slurs) => {
       "short": false
     }))
   }]
+}
+
+exports.generateRandomUserMention = (users, userid) => {
+  users = users.filter(elem => elem !== userid);
+  let id = exports.generateRandomNumberBetween(0, users.length);
+  return exports.userMention(users[id]);
 }
