@@ -1,12 +1,8 @@
-const { IncomingWebhook, RTMClient, WebClient } = require('@slack/client');
-const Configstore = require('configstore');
+const { RTMClient, WebClient } = require('@slack/client');
 const Finity = require('finity');
 const utils = require('./utils');
 const commands = require('./commands');
 
-//TODO: trash configstore
-
-const config = new Configstore(process.env.CONFIGKEY);
 const currentCoffeeParrots = [];
 const skippers = [];
 
@@ -14,8 +10,8 @@ const GENERALCHANNEL = "general";
 
 const SETTINGS = {
   coffeeTimeout: 30 * 1000,
-  morningCoffeeBreak: 9,
-  afternoonCoffeeBreak: 14,
+  morningCoffeeBreak: 13,
+  afternoonCoffeeBreak: 18,
   tolerance: 0.5,
   coffeeTimeDuration: 15 * 60 * 1000
 }
@@ -73,17 +69,10 @@ function createBotFiniteStateMachine() {
 }
 
 function startBot() {
-  return new Promise((resolve, reject) => {
-    if (!config.get('bot')) {
-      reject("Configs corrupted or empty: couldn't find bot object");
-      return;
-    }
-
-    let token = config.get('bot').bot_access_token;
+  return exports.store.getToken().then(token => {
 
     if (!token) {
-      reject("Configs corrupted: couldn't find bot access token");
-      return;
+      throw "Configs corrupted: couldn't find bot access token";
     }
 
     web = new WebClient(token);
@@ -93,13 +82,12 @@ function startBot() {
     rtm.on('ready', () => commands.init({rtm, web}));
     rtm.on('message', onMessage);
     console.log('bot started');
-    resolve();
   });
 }
 
 //ive decided that was really bad, TODO: rewrite this
 function onMessage(message) {
-  bot.handle('message', message);
+  //bot.handle('message', message);
   validate(message)
     .then(isNotFromChannelGeneral)
     .then(isNotPrivateMessage)
@@ -142,7 +130,7 @@ function isNotFromSelf(payload) {
 }
 
 function isCoffeeParrotEmoji(payload) {
-  payload.valid = payload.valid && payload.message.text.startsWith(':coffeeparrot:');
+  payload.valid = payload.valid && payload.message.text && payload.message.text.startsWith(':coffeeparrot:');
   return payload;
 }
 
@@ -155,31 +143,35 @@ function countParroteer(from, to, context) {
   let userid = context.eventPayload;
 
   utils.updateArray(currentCoffeeParrots, [userid]);
-  if (isEveryoneReady()) {
-    bot.handle('coffee-fulfill');
-  }
+  isEveryoneReady().then(ready => {
+    if (ready) {
+      bot.handle('coffee-fulfill');
+    }
+  });
+    
 }
 
 const isEveryoneReady = () => 
-  utils.compareLists(utils.trimLists(config.get('roster'), skippers), currentCoffeeParrots)
+  exports.store.getRoster().then(roster => utils.compareLists(utils.trimLists(roster, skippers), currentCoffeeParrots))
 
 function calloutMissingPeople() {
   console.log('bot is now reminding');
-  let message = getMissingPeopleMessage();
-
-  getChannel()
-  .then(channel => rtm.sendMessage(message, channel))
-  .catch(console.error);
+  getMissingPeopleMessage().then(message => {
+    getChannel()
+    .then(channel => rtm.sendMessage(message, channel))
+    .catch(console.error);
+  });
 }
 
 function getMissingPeopleMessage() {
-  let roster = config.get('roster');
-  let missing = utils.trimLists(roster, currentCoffeeParrots);
-  missing = utils.trimLists(missing, skippers);
-
-  let message = `*${currentCoffeeParrots.length}/${roster.length - skippers.length}* - `;
-  missing.forEach(person => message += utils.userMention(person) + " ");
-  return message;
+  return exports.store.getRoster().then(roster => {
+    let missing = utils.trimLists(roster, currentCoffeeParrots);
+    missing = utils.trimLists(missing, skippers);
+  
+    let message = `*${currentCoffeeParrots.length}/${missing.length + currentCoffeeParrots.length}* - `;
+    missing.forEach(person => message += utils.userMention(person) + " ");
+    return message;
+  });
 }
 
 function itsCoffeeTime() {
@@ -210,10 +202,7 @@ function flame(from, to, context) {
 }
 
 function getChannel() {
-  return new Promise((resolve, reject) => {
-    let channel = config.get('channel');
-    resolve(channel);
-  });
+  return exports.store.getChannel()
 }
 
 exports.updateSettings = (configName, content) => {
@@ -228,9 +217,10 @@ exports.skipUserWithMention = (userid, channelid) => {
     .catch(console.error);
 }
 
-exports.start = (webserver) => {
-  bot.handle('start-bot');
+exports.start = (webserver, store) => {
   exports.expressApp = webserver;
+  exports.store = store;
+  bot.handle('start-bot');
 }
 
 exports.automata = bot;

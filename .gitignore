@@ -66,6 +66,11 @@ typings/
 # Serverless directories
 .serverless
 
+.vscode
+Doug-9fc76b172c30.json
+bot.json
+launch.sh
+
 # latex output files
 *.fls
 *.fdb_latexmk

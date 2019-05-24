@@ -1,4 +1,3 @@
-const { IncomingWebhook, RTMClient, WebClient } = require('@slack/client');
 const express = require('express');
 const bodyParser = require('body-parser');
 const bot = require('./bot');
@@ -6,14 +5,13 @@ const auth = require('./auth-bot');
 const store = require('./store');
 
 //put port in configs or package.json maybe w/e
-const PORT = 6958;
+const port = process.env.port || 8080;
 const app = express();
 
-app.listen(PORT, () => {
-  console.log("HTTP server listening on", PORT);
-  store.seedConfigs();
+app.listen(port, () => {
+  console.log("HTTP server listening on", port);
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
-  auth.init(app);
-  bot.start(app);
+  auth.init(app, store);
+  bot.start(app, store);
 });

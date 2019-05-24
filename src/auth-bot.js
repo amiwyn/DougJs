@@ -46,10 +46,7 @@ function authenticateBot (querycode) {
 function createAuthUrl (querycode) {
   return {
     url: "https://slack.com/api/oauth.access",
-    qs: { code: querycode,
-          client_id: clientId,
-          client_secret: clientSecret
-        },
+    qs: { code: querycode, client_id: clientId, client_secret: clientSecret },
     method: 'GET',
   };
 }

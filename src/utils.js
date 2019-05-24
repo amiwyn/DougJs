@@ -47,7 +47,7 @@ exports.getUserIdFromCommandArgument = text => {
 
 exports.generateRandomInsult = (slurs, userid, users) => {
   let id = exports.generateRandomNumberBetween(0, slurs.length);
-  return exports.formatTextTokens(slurs[id], userid, users);
+  return [exports.formatTextTokens(slurs[id].text, userid, users), slurs[id]];
 }
 
 exports.formatTextTokens = (text, userid, users) => {
@@ -65,9 +65,77 @@ exports.getDeletedSlursMessage = (slurs) => {
     "color": "#e05f28",
     "pretext": "The following slurs have been cleaned up",
     "fields": slurs.map(slur => ({
-      "title": slur,
+      "title": slur.text,
       "short": false
     }))
+  }]
+}
+
+exports.getStatsMessage = (user, info, slurCount) => {
+  return [{
+    "fallback": "Stats of " + exports.userMention(user.id),
+    "color": "#" + info.user.color,
+    "pretext": "Stats of " + exports.userMention(user.id),
+    "fields": [
+      {
+        "title": ":bearded_person: Full name : " + info.user.profile.real_name,
+        "short": false
+      },
+      {
+        "title": ":robot_face: User ID : " + user.id,
+        "short": false
+      },
+      // {
+      //   "title": ":manon: Info : " + info.user.profile.status_text,
+      //   "short": false
+      // },
+      {
+        "title": ":moustache: Rank : " + (info.user.is_admin ? "Admin" : "Member"),
+        "short": false
+      },
+      {
+        "title": ":gem: Rupees : " + user.credits,
+        "short": false
+      },
+      {
+        "title": ":see_no_evil: Slurs added : " + (slurCount == 0 ? "0 (what a shame)" : slurCount),
+        "short": false
+      },
+  ]
+  }]
+}
+
+exports.getStatsMessageGab = (user, info, slurCount) => {
+  return [{
+    "fallback": "Stats of " + exports.userMention(user.id),
+    "color": "#" + info.user.color,
+    "pretext": "Stats of " + exports.userMention(user.id),
+    "fields": [
+      {
+        "title": ":bearded_person: Full name : " + info.user.profile.real_name,
+        "short": false
+      },
+      {
+        "title": ":robot_face: User ID : " + user.id,
+        "short": false
+      },
+      // {
+      //   "title": ":manon: Info : " + info.user.profile.status_text,
+      //   "short": false
+      // },
+      {
+        "title": ":moustache: Rank : " + (info.user.is_admin ? "Admin" : "Member"),
+        "short": false
+      },
+      {
+        "title": ":pika: Rupees : " + [...Array(user.credits).keys()].reduce((acc, val) => acc + ":gem:", ""),
+        "short": false
+      },
+      {
+        "title": ":see_no_evil: Slurs added : " + (slurCount == 0 ? "0 (what a shame)" : slurCount),
+        "short": false
+      },
+  ]
   }]
 }
 
