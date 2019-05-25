@@ -8,6 +8,8 @@ const VOTE_UP = '+1';
 const VOTE_DOWN = '-1';
 const FLAME_RECENT_LIMIT = 10;  
 
+const GAB_ID = "UB619L16W";
+
 let rtm; 
 let web;
 let recentFlame = [];
@@ -363,7 +365,7 @@ function statsCommand(req, res) {
   .then(([user, slurs, info]) => {
     let attachments = utils.getStatsMessage(user, info, slurs.length)
 
-    if (info.user.profile.real_name === "Gabriel Fillit") {
+    if (user.id === GAB_ID) {
       attachments = utils.getStatsMessageGab(user, info, slurs.length)
     }
 
