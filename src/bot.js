@@ -181,12 +181,24 @@ function itsCoffeeTime() {
 }
 
 function sendGo(from, to, context) {
-  currentCoffeeParrots.length = 0;
-  skippers.length = 0;
   let message = "Alright, let's do this. <!here> GO!"
+
   getChannel()
-    .then(channel => rtm.sendMessage(message, channel))
-    .catch(console.error);
+  .then(channel => rtm.sendMessage(message, channel))
+  .then(() => Promise.all(currentCoffeeParrots.map(user => addCredits(user, 5))))
+  .then(() => {
+    currentCoffeeParrots.length = 0;
+    skippers.length = 0;
+  })
+  .catch(console.error);
+}
+
+function addCredits(userid, amount) {
+  return bot.store.getUser(userid)
+  .then(user => {
+    user.credits = parseInt(user.credits) + parseInt(amount)
+    return bot.store.updateUser(user)
+  })
 }
 
 function endBreak(from, to, context) {
