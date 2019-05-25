@@ -1,7 +1,7 @@
 {
-  "name": "parroteer",
-  "version": "1.0.0",
-  "description": "",
+  "name": "doug",
+  "version": "1.1.0",
+  "description": "A slack bot to pester my colleagues.",
   "main": "index.js",
   "scripts": {
     "test": "mocha --slow 180 --exit",
@@ -9,25 +9,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FlyingJello/Parroteer.git"
+    "url": "git+https://github.com/FlyingJello/Doug.git"
   },
-  "author": "",
+  "author": "Hugues Trottier",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/FlyingJello/Parroteer/issues"
+    "url": "https://github.com/FlyingJello/Doug"
   },
-  "homepage": "https://github.com/FlyingJello/Parroteer#readme",
+  "homepage": "https://github.com/FlyingJello/Doug#readme",
   "dependencies": {
     "@google-cloud/datastore": "^3.1.2",
-    "@slack/client": "^4.2.2",
-    "body-parser": "^1.18.3",
-    "chai": "^4.1.2",
+    "@slack/client": "^4.12.0",
+    "body-parser": "^1.19.0",
+    "chai": "^4.2.0",
     "configstore": "^3.1.2",
-    "express": "^4.16.3",
+    "express": "^4.17.0",
     "finity": "^0.5.4",
     "mocha": "^5.2.0",
-    "request": "^2.87.0",
-    "request-promise": "^4.2.2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
     "sinon": "^5.1.1"
   }
 }
