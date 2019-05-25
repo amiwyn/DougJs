@@ -284,8 +284,7 @@ function addslurCommand(req, res) {
   let slur = req.body.text;
   console.log("user " + userid + " added slur: " + slur)
 
-  bot.store.getUser(req.body.user_id)
-  .then(user => addCredits(user, 1))
+  addCredits(userid, 1)
   .then(() => bot.store.addSlur(slur, userid))
   .then(() => res.send("you gained 1 rupee :gem:"))
   .catch(error => {
@@ -312,17 +311,17 @@ function giveCommand(req, res) {
   let args = req.body.text.split(WHITESPACE);
   let amount = parseInt(args[1])
   let receiver = utils.getUserIdFromCommandArgument(args[0])
+  let sender = req.body.user_id
 
   if (!Number.isInteger(amount)) {
     res.send(DOUG_ERRMSG + "please stop trying to break me :sweat:");
     return
   }
   
-  removeCredits(req.body.user_id, amount)
-  .then(() => bot.store.getUser(receiver))
-  .then(user => addCredits(user, amount))
+  removeCredits(sender, amount)
+  .then(() => addCredits(receiver, amount))
   .then(() => {
-    let message = utils.userMention(req.body.user_id) + " gave " + amount + " rupees to " + utils.userMention(receiver)
+    let message = utils.userMention(sender) + " gave " + amount + " rupees to " + utils.userMention(receiver)
     console.log(message)
     return rtm.sendMessage(message, req.body.channel_id)
   })
@@ -352,7 +351,12 @@ function removeCreditsUser(user, amount) {
   return bot.store.updateUser(user)
 }
 
-function addCredits(user, amount) {
+function addCredits(userid, amount) {
+  return bot.store.getUser(userid)
+  .then(user => addCreditsUser(user, amount))
+}
+
+function addCreditsUser(user, amount) {
   user.credits = parseInt(user.credits) + parseInt(amount)
   return bot.store.updateUser(user)
 }
