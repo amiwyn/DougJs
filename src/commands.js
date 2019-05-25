@@ -71,16 +71,18 @@ function flameCommand(req, res) {
 }
 
 function specificFlame(userid, channelid, slurid, requesterId) {
-  return removeCredits(requesterId, 10)
-  .then(() => Promise.all([bot.store.getRoster(), bot.store.getSlur(slurid)]))
+  return Promise.all([bot.store.getRoster(), bot.store.getSlur(slurid)])
   .then(([users, slur]) => {
     let message = utils.formatTextTokens(slur.text, userid, users)
-    return rtm.sendMessage(message, channelid).then(msg => {
+    return removeCredits(requesterId, 5)
+    .then(() => rtm.sendMessage(message, channelid).then(msg => {
       msg.text = message
       msg.slur = slur
       return msg
-    })
+    }))
   })
+  
+  removeCredits(requesterId, 5)
 }
 
 function randomFlame(userid, channelid) {
@@ -410,7 +412,7 @@ function testCommand(req, res) {
   //bot.store.purgeInactive()
   //bot.store.removeSlur(4867664006610944)
   //bot.store.removeCredits(req.body.user_id, 30)
-  //bot.store.getUser(req.body.user_id).then(user => addCredits(user, 34899200))
+  //bot.store.getUser(req.body.user_id).then(user => addCredits(user, 4000))
   res.send("done")
 }
 
