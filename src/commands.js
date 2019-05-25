@@ -24,7 +24,6 @@ function init(api) {
   bot.expressApp.post('/cmd/postpone', console.log);
   bot.expressApp.post('/cmd/configure', configureCommand);
   bot.expressApp.post('/cmd/resolve', resolveCommand);
-  bot.expressApp.post('/cmd/skipsomeone', skipsomeoneCommand);
   bot.expressApp.post('/cmd/joinsomeone', joinsomeoneCommand);
   bot.expressApp.post('/cmd/addslur', addslurCommand);
   bot.expressApp.post('/cmd/cleanup', cleanupCommand);
@@ -208,10 +207,24 @@ function joincoffeeCommand(req, res) {
 }
 
 function skipcoffeeCommand(req, res) {
-  let userid = req.body.user_id;
+  let userid = req.body.user_id
   let channelId = req.body.channel_id;
-  bot.skipUserWithMention(userid, channelId);
-  res.send();
+
+  if (req.body.text.length > 1) {
+    userid = utils.getUserIdFromCommandArgument(req.body.text)
+    isAdmin(req.body.user_id)
+    .then(() => {
+      bot.skipUserWithMention(userid, channelId);
+      res.send();
+    })
+    .catch(error => {
+      res.send(DOUG_ERRMSG + error);
+    });
+  }
+  else {
+    bot.skipUserWithMention(userid, channelId);    
+    res.send();
+  }
 }
 
 function configureCommand(req, res) {
@@ -242,19 +255,6 @@ function resolveCommand(req, res) {
   isAdmin(req.body.user_id)
   .then(() => {
     bot.automata.handle('coffee-resolve');
-    res.send();
-  })
-  .catch(error => {
-    res.send(DOUG_ERRMSG + error);
-  });
-}
-
-function skipsomeoneCommand(req, res) {
-  isAdmin(req.body.user_id)
-  .then(() => {
-    let userid = utils.getUserIdFromCommandArgument(req.body.text);
-    let channelId = req.body.channel_id;
-    bot.skipUserWithMention(userid, channelId);
     res.send();
   })
   .catch(error => {
