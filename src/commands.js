@@ -89,7 +89,7 @@ function randomFlame(userid, channelid) {
   .then(([users, slurs]) => {
     activeslurs = slurs.filter(slur => slur.active)
     let [message, slur] = utils.generateRandomInsult(activeslurs, userid, users)
-    while (recentFlame.some(newSlur => newSlur.id === slur.id)) {
+    while (recentFlame.some(newSlur => newSlur.id == slur.id)) {
       [message, slur] = utils.generateRandomInsult(activeslurs, userid, users)
     }
 
@@ -284,8 +284,8 @@ function addslurCommand(req, res) {
   let slur = req.body.text;
   console.log("user " + userid + " added slur: " + slur)
 
-  addCredits(userid, 1)
-  .then(() => bot.store.addSlur(slur, userid))
+  bot.store.addSlur(slur, userid)
+  .then(() => addCredits(userid, 1))
   .then(() => res.send("you gained 1 rupee :gem:"))
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
