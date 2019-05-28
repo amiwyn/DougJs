@@ -171,22 +171,23 @@ describe('trimLists', () => {
 });
 
 describe('formatTextWithUser', () => {
+  let users = ["321", "456"]
   it('should return same string', () => {
     let text = "hello asd iqwo9if qfiqnfoqnf sfklasf";
     let userid = "123"
-    utils.formatTextWithUser(text, userid).should.deep.equal(text);
+    utils.formatTextTokens(text, userid, users).should.deep.equal(text);
   });
   it('should replace {user}', () => {
     let text = "hello this is {user}! nice to meet you";
     let userid = "123"
     let expected = "hello this is <@123>! nice to meet you";
-    utils.formatTextWithUser(text, userid).should.deep.equal(expected);
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
   });
-  it('should not replace multiple times', () => {
+  it('should replace multiple times', () => {
     let text = "hello {user} {user} {user} {user}";
     let userid = "123"
-    let expected = "hello <@123> {user} {user} {user}";
-    utils.formatTextWithUser(text, userid).should.deep.equal(expected);
+    let expected = "hello <@123> <@123> <@123> <@123>";
+    utils.formatTextTokens(text, userid, users).should.deep.equal(expected);
   });
 });
 
