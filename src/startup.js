@@ -5,7 +5,7 @@ const auth = require('./auth-bot');
 const store = require('./store');
 
 //put port in configs or package.json maybe w/e
-const port = process.env.port || 8080;
+const port = process.env.PORT || 8080;
 const app = express();
 
 app.listen(port, () => {
