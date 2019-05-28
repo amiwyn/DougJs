@@ -194,10 +194,10 @@ function sendGo(from, to, context) {
 }
 
 function addCredits(userid, amount) {
-  return bot.store.getUser(userid)
+  return exports.store.getUser(userid)
   .then(user => {
     user.credits = parseInt(user.credits) + parseInt(amount)
-    return bot.store.updateUser(user)
+    return exports.store.updateUser(user)
   })
 }
 
