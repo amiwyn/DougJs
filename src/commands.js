@@ -343,7 +343,7 @@ function removeCreditsUser(user, amount) {
     }
 
     if (user.credits - amount < 0) {
-      throw "you don't have enough money. - You have " + user.credits + " :gem: and you need " + amount + " :gem:."
+      throw "you don't have enough money. - you have " + user.credits + " :gem: and you need " + amount + " :gem:."
     }
   }
 
@@ -389,7 +389,7 @@ function wholastCommand(req, res)  {
   .then(() => bot.store.getSlur(lastSlur.slur.id))
   .then(slur => {
     return bot.store.getUser(slur.createdBy)})
-  .then(user => res.send(utils.userMention(user.id) + " created that slur. -You paid 1 rupee :gem:"))
+  .then(user => res.send(utils.userMention(user.id) + " created that slur. - you paid 1 rupee :gem:"))
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
