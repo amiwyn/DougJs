@@ -34,6 +34,7 @@ function init(api) {
   bot.expressApp.post('/cmd/stats', statsCommand);
   bot.expressApp.post('/cmd/wholast', wholastCommand);
   bot.expressApp.post('/cmd/myslurs', myslursCommand);
+  bot.expressApp.post('/cmd/gamble', gambleCommand);
   bot.expressApp.post('/cmd/test', testCommand);
   rtm = api.rtm;
   web = api.web;
@@ -402,6 +403,34 @@ function myslursCommand(req, res)  {
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
+}
+
+function gambleCommand(req, res) {
+  let userid = req.body.user_id
+  let amount = parseInt(req.body.text)
+
+  if (!Number.isInteger(amount) || amount <= 0) {
+    res.send(DOUG_ERRMSG + "argument provided is invalid");
+    return
+  }
+
+  bot.store.getUser(userid)
+  .then(user => removeCreditsUser(user, amount))
+  .then(() => {
+    if (utils.generateRandomNumberBetween(0, 2)) {
+      let message = utils.userMention(userid) + " flipped a coin and won " + amount + " :gem: !"
+      return web.chat.postMessage({ channel: req.body.channel_id, text: message})
+      .then(() => addCredits(userid, amount*2)) 
+    }
+    else {
+      let message = utils.userMention(userid) + " flipped a coin and lost " + amount + " :gem: !"
+      return web.chat.postMessage({ channel: req.body.channel_id, text: message});
+    }
+  })
+  .catch(error => {
+    res.send(DOUG_ERRMSG + error);
+  });
+  res.send()
 }
 
 function testCommand(req, res) {
