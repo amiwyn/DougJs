@@ -306,6 +306,9 @@ function listallCommand(req, res) {
 function viewcreditCommand(req, res) {
   bot.store.getUser(req.body.user_id)
   .then(user => res.send("You have " + user.credits + " rupees :gem:"))
+  .catch(error => {
+    res.send(DOUG_ERRMSG + error);
+  });
 }
 
 function giveCommand(req, res) {
