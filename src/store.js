@@ -161,3 +161,13 @@ exports.getToken = () => {
   const key = datastore.key(['channel', 1])
   return datastore.get(key).then(data => data[0].token);
 }
+
+exports.getSigningSecret = () => {
+  const key = datastore.key(['secrets', 'slack-signing']);
+  return datastore.get(key).then(data => data[0].secret);
+}
+
+exports.getClientSecret = () => {
+  const key = datastore.key(['secrets', 'client-secret']);
+  return datastore.get(key).then(data => data[0].secret);
+}
