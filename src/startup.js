@@ -11,9 +11,9 @@ const app = express();
 
 app.listen(port, () => {
   console.log("HTTP server listening on", port);
-  app.use(requestVerification.verify);
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(requestVerification.verify);
   auth.init(app, store);
   bot.start(app, store);
 });
