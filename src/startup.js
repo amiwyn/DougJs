@@ -5,7 +5,6 @@ const auth = require('./auth-bot');
 const store = require('./store');
 const requestVerification = require('./request-verification');
 
-//put port in configs or package.json maybe w/e
 const port = process.env.PORT || 8080;
 const app = express();
 
