@@ -81,8 +81,6 @@ function specificFlame(userid, channelid, slurid, requesterId) {
       return msg
     }))
   })
-  
-  removeCredits(requesterId, 5)
 }
 
 function randomFlame(userid, channelid) {
