@@ -94,7 +94,7 @@ exports.getStatsMessage = (user, info, slurCount) => {
         "short": false
       },
       {
-        "title": ":gem: Rupees : " + user.credits,
+        "title": ":rupee: Rupees : " + user.credits,
         "short": false
       },
       {
@@ -128,7 +128,7 @@ exports.getStatsMessageGab = (user, info, slurCount) => {
         "short": false
       },
       {
-        "title": ":pika: Rupees : " + [...Array(user.credits).keys()].reduce((acc, val) => acc + ":gem:", ""),
+        "title": ":pika: Rupees : " + [...Array(user.credits).keys()].reduce((acc, val) => acc + ":rupee:", ""),
         "short": false
       },
       {

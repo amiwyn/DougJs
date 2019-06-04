@@ -285,7 +285,7 @@ function addslurCommand(req, res) {
 
   bot.store.addSlur(slur, userid)
   .then(() => addCredits(userid, 1))
-  .then(() => res.send("you gained 1 rupee :gem:"))
+  .then(() => res.send("you gained 1 rupee :rupee:"))
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
@@ -303,7 +303,7 @@ function listallCommand(req, res) {
 
 function viewcreditCommand(req, res) {
   bot.store.getUser(req.body.user_id)
-  .then(user => res.send("You have " + user.credits + " rupees :gem:"))
+  .then(user => res.send("You have " + user.credits + " rupees :rupee:"))
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
@@ -345,7 +345,7 @@ function removeCreditsUser(user, amount) {
     }
 
     if (user.credits - amount < 0) {
-      throw "you don't have enough money. - you have " + user.credits + " :gem: and you need " + amount + " :gem:."
+      throw "you don't have enough money. - you have " + user.credits + " :rupee: and you need " + amount + " :rupee:."
     }
   }
 
@@ -391,7 +391,7 @@ function wholastCommand(req, res)  {
   .then(() => bot.store.getSlur(lastSlur.slur.id))
   .then(slur => {
     return bot.store.getUser(slur.createdBy)})
-  .then(user => res.send(utils.userMention(user.id) + " created that slur. - you paid 1 rupee :gem:"))
+  .then(user => res.send(utils.userMention(user.id) + " created that slur. - you paid 1 rupee :rupee:"))
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
@@ -419,12 +419,12 @@ function gambleCommand(req, res) {
   .then(user => removeCreditsUser(user, amount))
   .then(() => {
     if (utils.generateRandomNumberBetween(0, 2)) {
-      let message = utils.userMention(userid) + " flipped a coin and won " + amount + " :gem: !"
+      let message = utils.userMention(userid) + " flipped a coin and won " + amount + " :rupee: !"
       return web.chat.postMessage({ channel: req.body.channel_id, text: message})
       .then(() => addCredits(userid, amount*2)) 
     }
     else {
-      let message = utils.userMention(userid) + " flipped a coin and lost " + amount + " :gem: !"
+      let message = utils.userMention(userid) + " flipped a coin and lost " + amount + " :rupee: !"
       return web.chat.postMessage({ channel: req.body.channel_id, text: message});
     }
   })
