@@ -446,7 +446,8 @@ function testCommand(req, res) {
   //bot.store.removeSlur(4867664006610944)
   //bot.store.removeCredits(req.body.user_id, 30)
   //bot.store.getUser(req.body.user_id).then(user => addCredits(user, 4000))
-  res.send("done\'asd\'asd")
+  bot.store.getRoster().then(console.log)
+  res.send("done")
 }
 
 module.exports = {

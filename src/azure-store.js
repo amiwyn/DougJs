@@ -16,7 +16,7 @@ exports.addSlur = (text, userid) => {
         text: text,
         createdBy: userid,
         active: true
-      })
+      }).then()
   })
 }
 
@@ -26,7 +26,7 @@ exports.batchAddSlurs = slurs => {
 
 exports.removeSlur = id => {
   return knex('slurs')
-    .where('text', text)
+    .where('id', id)
     .update('active', false)
 }
 
@@ -35,7 +35,7 @@ exports.getSlur = id => {
 }
 
 exports.getSlursFrom = userid => {
-  return knex('slurs').where('createdBy', userid).then(slurs => toLowercaseObject(slurs[0]))
+  return knex('slurs').where('createdBy', userid).then(slurs => slurs.map(slur => toLowercaseObject(slur)))
 }
 
 exports.purgeInactive = () => {
@@ -47,14 +47,14 @@ exports.removeAllUsers = () => {
 }
 
 exports.getRoster = () => {
-  return knex('roster').then(users => users.map(user => toLowercaseObject(user)))
+  return knex('roster').then(users => users.map(user => user.Id))
 }
 
 exports.addToRoster = userid => {
   return knex('roster')
     .insert({
       id: userid
-    })
+    }).then()
 }
 
 exports.removeFromRoster = userid => {
@@ -68,7 +68,7 @@ exports.addUser = userid => {
         .insert({
           id: userid,
           credits: 10
-        })
+        }).then()
     }
   })
 }
@@ -107,19 +107,6 @@ exports.getSigningSecret = () => {
 
 exports.getClientSecret = () => {
   return knex('secrets').where('id', 'client-secret').then(data => data[0].Secret);
-}
-
-exports.setsecrets = () => {
-  return knex('secrets').insert({
-    id: 'client-secret',
-    secret: '824e1bd5b377c9281b791d452b36b3f5'
-  })
-}
-exports.setsecrets2 = () => {
-  return knex('secrets').insert({
-    id: 'slack-signing',
-    secret: '4b19e889375ad3d3a09d35e1d5de2bf5'
-  })
 }
 
 function toLowercaseObject(obj) {
