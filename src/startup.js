@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bot = require('./bot');
 const auth = require('./auth-bot');
-const store = require('./store');
+//const store = require('./store');
+const store = require('./azure-store');
 const requestVerification = require('./request-verification');
 
 const port = process.env.PORT || 8080;

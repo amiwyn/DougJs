@@ -77,3 +77,4 @@ launch.sh
 *.aux
 doc/*.gz
 doc/*.log
+app.yaml

@@ -324,7 +324,6 @@ function giveCommand(req, res) {
   .then(() => addCredits(receiver, amount))
   .then(() => {
     let message = utils.userMention(sender) + " gave " + amount + " rupees to " + utils.userMention(receiver)
-    console.log(message)
     return rtm.sendMessage(message, req.body.channel_id)
   })
   .then(() => res.send())
@@ -431,7 +430,7 @@ function gambleCommand(req, res) {
   .catch(error => {
     res.send(DOUG_ERRMSG + error);
   });
-  res.send()
+  res.send();
 }
 
 function testCommand(req, res) {
@@ -447,7 +446,7 @@ function testCommand(req, res) {
   //bot.store.removeSlur(4867664006610944)
   //bot.store.removeCredits(req.body.user_id, 30)
   //bot.store.getUser(req.body.user_id).then(user => addCredits(user, 4000))
-  res.send("done")
+  res.send("done\'asd\'asd")
 }
 
 module.exports = {
