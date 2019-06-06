@@ -55,6 +55,10 @@ exports.formatTextTokens = (text, userid, users) => {
   return text.replace(/{random}/g, exports.generateRandomUserMention(users, userid))
 }
 
+exports.incrementFat = (text, number) => {
+  return text.replace(/350\++/g, number)
+}
+
 exports.reverseUserMention = (message) => {
   return message.replace(/<@[a-z0-9]*>/gi, '{user}')
 }

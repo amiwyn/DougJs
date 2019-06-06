@@ -74,6 +74,8 @@ function specificFlame(userid, channelid, slurid, requesterId) {
   return Promise.all([bot.store.getRoster(), bot.store.getSlur(slurid)])
   .then(([users, slur]) => {
     let message = utils.formatTextTokens(slur.text, userid, users)
+    message = utils.incrementFat(message, ++bot.fatCounter)
+
     return removeCredits(requesterId, 5)
     .then(() => rtm.sendMessage(message, channelid).then(msg => {
       msg.text = message
@@ -88,9 +90,11 @@ function randomFlame(userid, channelid) {
   .then(([users, slurs]) => {
     activeslurs = slurs.filter(slur => slur.active)
     let [message, slur] = utils.generateRandomInsult(activeslurs, userid, users)
+    
     while (recentFlame.some(newSlur => newSlur.id == slur.id)) {
       [message, slur] = utils.generateRandomInsult(activeslurs, userid, users)
     }
+    message = utils.incrementFat(message, ++bot.fatCounter)
 
     return rtm.sendMessage(message, channelid).then(msg => {
       msg.text = message

@@ -232,6 +232,7 @@ exports.skipUserWithMention = (userid, channelid) => {
 exports.start = (webserver, store) => {
   exports.expressApp = webserver;
   exports.store = store;
+  exports.fatCounter = 350;
   bot.handle('start-bot');
 }
 
